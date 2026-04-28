@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LifeSe — National Health Intelligence Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #4f8ef7;
+      --primary-glow: rgba(79, 142, 247, 0.35);
+      --accent: #00e5b5;
+      --accent2: #a855f7;
+      --bg: #070b14;
+      --bg2: #0d1526;
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.1);
+      --text: #e8edf5;
+      --muted: rgba(232,237,245,0.5);
+    }
+
+    html, body { width: 100%; height: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); overflow: hidden; }
+
+    /* ─── BACKGROUND EFFECT ─── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(79,142,247,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,142,247,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .bg-glow {
+      position: fixed; z-index: 0;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .glow-1 { width: 600px; height: 600px; top: -200px; left: -200px; background: rgba(79,142,247,0.12); }
+    .glow-2 { width: 500px; height: 500px; bottom: -150px; right: -150px; background: rgba(168,85,247,0.1); }
+    .glow-3 { width: 400px; height: 400px; top: 40%; left: 40%; background: rgba(0,229,181,0.06); }
+
+    /* ─── SLIDES ─── */
+    .presentation { position: relative; z-index: 1; width: 100%; height: 100%; }
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(40px);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.22,.68,0,1.2);
+    }
+    .slide.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .slide.exit { opacity: 0; transform: translateY(-40px); }
+
+    /* ─── NAV ─── */
+    .nav {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 12px; z-index: 100;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: 100px; padding: 10px 20px;
+      backdrop-filter: blur(16px);
+    }
+    .nav-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); cursor: pointer;
+      transition: all 0.3s;
+    }
+    .nav-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+    .nav-btn {
+      background: none; border: none; color: var(--muted); font-size: 20px;
+      cursor: pointer; padding: 4px 8px; transition: color 0.2s;
+    }
+    .nav-btn:hover { color: var(--text); }
+    .slide-counter { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 1px; }
+    kbd {
+      position: fixed; top: 20px; right: 24px; font-size: 11px; color: var(--muted);
+      background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+      font-family: inherit;
+    }
+
+    /* ─── COMMON COMPONENTS ─── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+      border: 1px solid;
+    }
+    .badge-blue { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.3); color: #7db5fa; }
+    .badge-green { background: rgba(0,229,181,0.1); border-color: rgba(0,229,181,0.3); color: #00e5b5; }
+    .badge-purple { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.3); color: #c084fc; }
+    .badge-red { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+
+    h1.hero { font-family: 'Outfit', sans-serif; font-size: clamp(40px, 6vw, 72px); font-weight: 800; line-height: 1.1; text-align: center; }
+    h2.section-title { font-family: 'Outfit', sans-serif; font-size: clamp(28px, 4vw, 48px); font-weight: 700; line-height: 1.2; text-align: center; margin-bottom: 8px; }
+    p.subtitle { color: var(--muted); font-size: clamp(14px, 1.5vw, 18px); text-align: center; max-width: 640px; line-height: 1.7; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #4f8ef7, #00e5b5);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gradient-text-purple {
+      background: linear-gradient(135deg, #a855f7, #4f8ef7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .card:hover { border-color: rgba(79,142,247,0.3); transform: translateY(-2px); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 900px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 1000px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%; max-width: 1100px; }
+
+    .stat-number { font-family: 'Outfit', sans-serif; font-size: 42px; font-weight: 800; }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .icon-box {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 12px;
+    }
+    .icon-box-blue { background: rgba(79,142,247,0.15); }
+    .icon-box-green { background: rgba(0,229,181,0.12); }
+    .icon-box-purple { background: rgba(168,85,247,0.15); }
+    .icon-box-red { background: rgba(239,68,68,0.12); }
+
+    .feature-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 2px; margin: 16px auto; }
+
+    /* ─── SLIDE 1: HERO ─── */
+    .hero-logo { font-family: 'Outfit',sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--primary); margin-bottom: 32px; display: flex; align-items: center; gap: 8px; }
+    .hero-logo span { color: var(--text); }
+    .hero-tagline { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .hero-cta { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary { padding: 12px 28px; background: var(--primary); border: none; border-radius: 100px; color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
+    .btn-primary:hover { background: #6ba3fa; transform: scale(1.02); }
+    .btn-ghost { padding: 12px 28px; background: transparent; border: 1px solid var(--border); border-radius: 100px; color: var(--text); font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ─── FLOW ARROWS ─── */
+    .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 24px 0; }
+    .flow-step { padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 600; border: 1px solid; text-align: center; }
+    .flow-arrow { color: var(--primary); font-size: 18px; }
+
+    /* ─── TECH STACK ─── */
+    .tech-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 100px; font-size: 13px; font-weight: 500; }
+    .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .tech-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 860px; margin-top: 24px; }
+
+    /* ─── PERF TABLE ─── */
+    .perf-table { width: 100%; max-width: 800px; border-collapse: collapse; font-size: 14px; }
+    .perf-table th { text-align: left; padding: 12px 16px; color: var(--muted); font-weight: 500; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .perf-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .perf-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .pill-green { background: rgba(0,229,181,0.12); color: #00e5b5; }
+    .pill-blue { background: rgba(79,142,247,0.12); color: #7db5fa; }
+    .pill-red { background: rgba(239,68,68,0.12); color: #f87171; }
+
+    /* ─── ARCHITECTURE ─── */
+    .arch { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 860px; }
+    .arch-row { display: flex; align-items: center; gap: 12px; }
+    .arch-label { font-size: 12px; color: var(--muted); width: 100px; text-align: right; flex-shrink: 0; }
+    .arch-bar { flex: 1; height: 48px; border-radius: 12px; display: flex; align-items: center; padding: 0 18px; font-size: 13px; font-weight: 600; gap: 10px; border: 1px solid; }
+
+    /* ─── SECURITY ─── */
+    .security-list { list-style: none; display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 680px; }
+    .security-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; }
+    .security-list .dot { color: var(--accent); font-size: 18px; line-height: 1.4; flex-shrink: 0; }
+
+    /* ─── CLOSING ─── */
+    .closing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 900px; margin-top: 32px; }
+    .closing-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 20px; text-align: center; }
+    .closing-icon { font-size: 32px; margin-bottom: 12px; }
+    .closing-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .closing-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow glow-1"></div>
+<div class="bg-glow glow-2"></div>
+<div class="bg-glow glow-3"></div>
+
+<kbd>← → Arrow Keys to Navigate</kbd>
+
+<div class="presentation" id="presentation">
+
+  <!-- ─────────────────────────────────── SLIDE 1: HERO ─── -->
+  <div class="slide active" id="slide-0">
+    <div class="hero-logo">🏥 <span>Life</span>Se</div>
+    <p class="hero-tagline">National Health Intelligence Platform</p>
+    <h1 class="hero">India's <span class="gradient-text">AI-Powered</span><br/>Digital Health Network</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Connecting 1.4 billion citizens with verified doctors, real-time booking, E2EE medical records, and intelligent health management — built for scale.</p>
+    <div class="hero-cta">
+      <span class="badge badge-blue">⚡ Node.js + Express</span>
+      <span class="badge badge-green">🔒 E2EE Vault</span>
+      <span class="badge badge-purple">📊 ABDM Compliant</span>
+      <span class="badge badge-red">💳 Payment Ready</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 2: PROBLEM ─── -->
+  <div class="slide" id="slide-1">
+    <h2 class="section-title">The <span class="gradient-text">Problem</span> We Solve</h2>
+    <div class="divider"></div>
+    <p class="subtitle" style="margin-bottom: 32px;">India's healthcare system is fragmented — siloed records, unverified doctors, and no universal booking layer.</p>
+    <div class="grid-3" style="max-width: 860px;">
+      <div class="card" style="text-align:center;">
+        <div class="icon-box icon-box-red" style="margin: 0 auto 12px;">❌</div>
+        <div class="feature-title">Unverified Providers</div>
+        <div class="feature-desc">No standard verification for doctors across platforms; patients can't trust credentials.</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon-box icon-box-red" style="margin: 0 auto 12px;">📂</div>
+        <div class="feature-title">Siloed Medical Records</div>
+        <div class="feature-desc">Patient data locked in hospital systems, inaccessible and unencrypted during emergencies.</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon-box icon-box-red" style="margin: 0 auto 12px;">🐢</div>
+        <div class="feature-title">Slow Booking</div>
+        <div class="feature-desc">Phone-based appointment booking with no real-time slot availability, no payments.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 3: SOLUTION ─── -->
+  <div class="slide" id="slide-2">
+    <h2 class="section-title">The <span class="gradient-text">LifeSe</span> Solution</h2>
+    <div class="divider"></div>
+    <div class="grid-4" style="max-width: 1020px; margin-top: 24px;">
+      <div class="card">
+        <div class="icon-box icon-box-blue">📄</div>
+        <div class="feature-title">Lab Report AI Analyst</div>
+        <div class="feature-desc">Converts complex medical jargon into plain-English insights with one-click analysis.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-green">📈</div>
+        <div class="feature-title">LifeSe Health Score</div>
+        <div class="feature-desc">Unified "CIBIL" score for health, lowering insurance premiums for healthy citizens.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-purple">🎧</div>
+        <div class="feature-title">Clinical Audio Briefs</div>
+        <div class="feature-desc">AI-generated audio summaries for doctors to listen to before consultations via browser TTS.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-blue">🤝</div>
+        <div class="feature-title">Community Health Circles</div>
+        <div class="feature-desc">Condition-specific peer support forums with anonymous interactions and sharing.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-green">⌚</div>
+        <div class="feature-title">Wearable Sync (IoT)</div>
+        <div class="feature-desc">Real-time heart rate & blood pressure sync from linked devices to the health cockpit.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-purple">🚨</div>
+        <div class="feature-title">Triple-Tap SOS Flow</div>
+        <div class="feature-desc">Haptic-enabled emergency trigger with a public medical card for first responders.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-blue">👨‍⚕️</div>
+        <div class="feature-title">Second Opinion Market</div>
+        <div class="feature-desc">Collaboration layer for specialists to peer-review complex cases securely.</div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-box-green">💊</div>
+        <div class="feature-title">Medicine Database</div>
+        <div class="feature-desc">50,000+ Indian medicines indexed for precision prescribing and dosage safety.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 4: ARCHITECTURE ─── -->
+  <div class="slide" id="slide-3">
+    <h2 class="section-title">System <span class="gradient-text">Architecture</span></h2>
+    <div class="divider"></div>
+    <div class="arch" style="margin-top: 16px;">
+      <div class="arch-row">
+        <div class="arch-label">Frontend</div>
+        <div class="arch-bar" style="background: rgba(79,142,247,0.08); border-color: rgba(79,142,247,0.3); color: #7db5fa;">
+          🖥️ Next.js 14 (App Router) &nbsp;·&nbsp; React &nbsp;·&nbsp; Tailwind CSS &nbsp;·&nbsp; Glassmorphism UI
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">API Layer</div>
+        <div class="arch-bar" style="background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.3); color: #c084fc;">
+          ⚡ Express.js REST API &nbsp;·&nbsp; JWT Auth &nbsp;·&nbsp; httpOnly Cookies &nbsp;·&nbsp; Rate Limiting
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">Data Layer</div>
+        <div class="arch-bar" style="background: rgba(0,229,181,0.08); border-color: rgba(0,229,181,0.3); color: #00e5b5;">
+          🗄️ Better-SQLite3 (ACID) &nbsp;·&nbsp; IndexedDB (Offline) &nbsp;·&nbsp; Atomic Writes
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">Security</div>
+        <div class="arch-bar" style="background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #f87171;">
+          🔒 E2EE (AES-256-GCM) &nbsp;·&nbsp; ZK Proofs &nbsp;·&nbsp; CSP Headers &nbsp;·&nbsp; DPDP Compliant
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">External</div>
+        <div class="arch-bar" style="background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.25); color: #fbbf24;">
+          🏛️ ABDM / ABHA &nbsp;·&nbsp; Fast2SMS OTP &nbsp;·&nbsp; Sentry Monitoring &nbsp;·&nbsp; CI/CD GitHub Actions
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 5: USER FLOWS ─── -->
+  <div class="slide" id="slide-4">
+    <h2 class="section-title">User <span class="gradient-text">Journeys</span></h2>
+    <div class="divider"></div>
+    <div class="grid-2" style="max-width: 860px; margin-top: 20px; align-items: start;">
+      <div>
+        <p style="font-size: 12px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;">🧑 Citizen Flow</p>
+        <div class="flow" style="flex-direction: column; align-items: flex-start; margin: 0; gap: 8px;">
+          <div class="flow-step badge-blue" style="border-radius: 10px; border-color: rgba(79,142,247,0.3);">📱 Register with Phone + Email → ABHA ID</div>
+          <div style="color: var(--primary); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-blue" style="border-radius: 10px; border-color: rgba(79,142,247,0.3);">🔍 Browse Verified Doctors / Labs</div>
+          <div style="color: var(--primary); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-blue" style="border-radius: 10px; border-color: rgba(79,142,247,0.3);">📅 Book Real-Time Slot</div>
+          <div style="color: var(--primary); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-green" style="border-radius: 10px;">💳 Pay (UPI / Card / Wallet)</div>
+          <div style="color: var(--accent); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-green" style="border-radius: 10px;">🔐 View E2EE Medical Records</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size: 12px; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;">👨‍⚕️ Doctor Flow</p>
+        <div class="flow" style="flex-direction: column; align-items: flex-start; margin: 0; gap: 8px;">
+          <div class="flow-step badge-purple" style="border-radius: 10px; border-color: rgba(168,85,247,0.3);">📝 Register + Upload Credentials</div>
+          <div style="color: var(--accent2); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-purple" style="border-radius: 10px; border-color: rgba(168,85,247,0.3);">⏳ Admin Reviews → Blue Tick Granted</div>
+          <div style="color: var(--accent2); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-purple" style="border-radius: 10px; border-color: rgba(168,85,247,0.3);">📋 Manage Slots & Appointments</div>
+          <div style="color: var(--accent2); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-purple" style="border-radius: 10px; border-color: rgba(168,85,247,0.3);">💊 Write Encrypted Prescriptions</div>
+          <div style="color: var(--accent2); margin-left: 20px;">↓</div>
+          <div class="flow-step badge-purple" style="border-radius: 10px; border-color: rgba(168,85,247,0.3);">📞 Conduct Telemedicine Session</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 6: SECURITY ─── -->
+  <div class="slide" id="slide-5">
+    <h2 class="section-title">Enterprise-Grade <span class="gradient-text">Security</span></h2>
+    <div class="divider"></div>
+    <div class="grid-2" style="max-width: 860px; margin-top: 20px;">
+      <ul class="security-list" style="max-width: 100%;">
+        <li><span class="dot">✓</span><span><strong>E2EE Vault</strong> — Medical data encrypted with AES-256-GCM before it leaves the browser. Server never sees plaintext.</span></li>
+        <li><span class="dot">✓</span><span><strong>Zero-Knowledge Proofs</strong> — Schnorr & snarkjs for privacy-preserving identity verification.</span></li>
+        <li><span class="dot">✓</span><span><strong>JWT Rotation</strong> — 15-minute access tokens + 30-day sliding refresh via httpOnly, SameSite:Strict cookies.</span></li>
+        <li><span class="dot">✓</span><span><strong>Rate Limiting</strong> — 500 req/min global cap + per-phone 60-second OTP throttle to prevent SMS wallet drain.</span></li>
+      </ul>
+      <ul class="security-list" style="max-width: 100%;">
+        <li><span class="dot">✓</span><span><strong>DPDP Act Compliant</strong> — Patient consent flow, audit logs, and right-to-delete in place.</span></li>
+        <li><span class="dot">✓</span><span><strong>Security Headers</strong> — CSP, HSTS, X-Frame-Options, Referrer-Policy applied globally.</span></li>
+        <li><span class="dot">✓</span><span><strong>Banned User Guard</strong> — Every authenticated request checks ban status before any data access.</span></li>
+        <li><span class="dot">✓</span><span><strong>Atomic DB Writes</strong> — ACID-compliant SQLite prevents data corruption under concurrent writes.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 7: LOAD TEST ─── -->
+  <div class="slide" id="slide-6">
+    <h2 class="section-title">Load Testing — <span class="gradient-text">1,000 Users</span></h2>
+    <div class="divider"></div>
+    <p class="subtitle" style="margin-bottom: 28px;">Simulated 1,000 concurrent users sending OTP requests in 50-user batches to stress the authentication and database layers.</p>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Before (JSON File)</th>
+          <th>After (SQLite)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Average Latency</td>
+          <td>64ms</td>
+          <td>12ms</td>
+          <td><span class="pill pill-green">✓ 5× Faster</span></td>
+        </tr>
+        <tr>
+          <td>OTP Throttle Accuracy</td>
+          <td>85%</td>
+          <td>100%</td>
+          <td><span class="pill pill-green">✓ Perfect</span></td>
+        </tr>
+        <tr>
+          <td>Data Persistence Under Load</td>
+          <td>Potential loss (debounce)</td>
+          <td>ACID guaranteed</td>
+          <td><span class="pill pill-green">✓ Resolved</span></td>
+        </tr>
+        <tr>
+          <td>Rate Limit Enforcement</td>
+          <td>Active</td>
+          <td>Active</td>
+          <td><span class="pill pill-blue">✓ Maintained</span></td>
+        </tr>
+        <tr>
+          <td>Concurrent Write Races</td>
+          <td>High Risk</td>
+          <td>Zero</td>
+          <td><span class="pill pill-green">✓ Eliminated</span></td>
+        </tr>
+        <tr>
+          <td>Server Crash Recovery</td>
+          <td>.bak rollback</td>
+          <td>WAL journal replay</td>
+          <td><span class="pill pill-green">✓ Upgraded</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 8: TECH STACK ─── -->
+  <div class="slide" id="slide-7">
+    <h2 class="section-title">Technology <span class="gradient-text">Stack</span></h2>
+    <div class="divider"></div>
+    <div class="tech-grid">
+      <div class="tech-pill"><div class="tech-dot" style="background:#00d8ff;"></div>Next.js 14</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#61dafb;"></div>React 18</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#38bdf8;"></div>Tailwind CSS</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#68d391;"></div>Node.js</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f6ad55;"></div>Express.js</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#a78bfa;"></div>Better-SQLite3</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f87171;"></div>Zod Validation</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#fbbf24;"></div>JWT Auth</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#34d399;"></div>AES-256-GCM</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#60a5fa;"></div>Web Crypto API</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f472b6;"></div>IndexedDB</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#a3e635;"></div>Prisma ORM</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#fb923c;"></div>Pino Logger</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#e879f9;"></div>snarkjs / ZK</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#22d3ee;"></div>ABDM / ABHA API</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#facc15;"></div>Fast2SMS</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f87171;"></div>Sentry</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#9ca3af;"></div>GitHub Actions CI</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 9: STATS ─── -->
+  <div class="slide" id="slide-8">
+    <h2 class="section-title">Platform <span class="gradient-text">Numbers</span></h2>
+    <div class="divider"></div>
+    <div class="grid-4" style="max-width: 1020px; margin-top: 28px;">
+      <div class="card" style="text-align:center;">
+        <div class="stat-number gradient-text">40+</div>
+        <div class="stat-label">API Endpoints</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number gradient-text">1,000</div>
+        <div class="stat-label">Concurrent Users Tested</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number gradient-text">50K+</div>
+        <div class="stat-label">Medicines Indexed</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number gradient-text">256</div>
+        <div class="stat-label">-bit AES Encryption</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number" style="background: linear-gradient(135deg, #a855f7, #4f8ef7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">12ms</div>
+        <div class="stat-label">Avg. Auth Latency (SQLite)</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number" style="background: linear-gradient(135deg, #a855f7, #4f8ef7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">4</div>
+        <div class="stat-label">User Roles (Citizen / Doctor / Admin / Guardian)</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number" style="background: linear-gradient(135deg, #a855f7, #4f8ef7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">3</div>
+        <div class="stat-label">Payment Methods (UPI / Card / Wallet)</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="stat-number gradient-text">100%</div>
+        <div class="stat-label">OTP Throttle Accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 10: ROADMAP ─── -->
+  <div class="slide" id="slide-9">
+    <h2 class="section-title">What's <span class="gradient-text">Next</span></h2>
+    <div class="divider"></div>
+    <div class="closing-grid">
+      <div class="closing-card">
+        <div class="closing-icon">🐘</div>
+        <div class="closing-title">PostgreSQL Migration</div>
+        <div class="closing-desc">Full production database with connection pooling via Prisma to handle 100K+ users seamlessly.</div>
+      </div>
+      <div class="closing-card">
+        <div class="closing-icon">🚀</div>
+        <div class="closing-title">Deployment</div>
+        <div class="closing-desc">Nginx reverse proxy, Docker containers, SSL/TLS, and automated CI/CD to AWS / Vercel.</div>
+      </div>
+      <div class="closing-card">
+        <div class="closing-icon">📱</div>
+        <div class="closing-title">Mobile App</div>
+        <div class="closing-desc">React Native app with biometric unlock, offline vault access, and push notifications.</div>
+      </div>
+      <div class="closing-card">
+        <div class="closing-icon">🤖</div>
+        <div class="closing-title">AI Diagnostics</div>
+        <div class="closing-desc">Integrate Gemini for radiology report reading, prescription OCR, and clinical note generation.</div>
+      </div>
+      <div class="closing-card">
+        <div class="closing-icon">⚡</div>
+        <div class="closing-title">Redis Caching</div>
+        <div class="closing-desc">Redis for OTP storage (sub-1ms) and session management, eliminating all DB hits on auth.</div>
+      </div>
+      <div class="closing-card">
+        <div class="closing-icon">🏛️</div>
+        <div class="closing-title">Full ABDM Live</div>
+        <div class="closing-desc">Move from ABHA sandbox to production, enabling real national health record linking for citizens.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────── SLIDE 11: CLOSING ─── -->
+  <div class="slide" id="slide-10">
+    <div class="hero-logo" style="margin-bottom: 16px;">🏥 <span>Life</span>Se</div>
+    <h1 class="hero" style="font-size: clamp(36px, 5vw, 60px);">
+      Built for <span class="gradient-text">Bharat.</span><br/>Designed for <span class="gradient-text-purple">Scale.</span>
+    </h1>
+    <div class="divider"></div>
+    <p class="subtitle">One platform. Every citizen. Every doctor. One secure, intelligent, connected health future.</p>
+    <div class="hero-cta" style="margin-top: 40px;">
+      <span class="badge badge-blue">🔒 DPDP Compliant</span>
+      <span class="badge badge-green">🏛️ ABDM Ready</span>
+      <span class="badge badge-purple">⚡ 1000-User Load Tested</span>
+    </div>
+    <p style="margin-top: 40px; color: var(--muted); font-size: 13px;">
+      Contact: <span style="color: var(--primary);">support@lifese.health</span> &nbsp;|&nbsp; 
+      GitHub: <span style="color: var(--primary);">github.com/lifese</span>
+    </p>
+  </div>
+
+</div>
+
+<!-- ─── NAVIGATION ─── -->
+<nav class="nav" id="nav">
+  <button class="nav-btn" id="prev-btn">←</button>
+  <div id="dots"></div>
+  <button class="nav-btn" id="next-btn">→</button>
+  <span class="slide-counter" id="counter">1 / 11</span>
+</nav>
+
+<script>
+  const TOTAL = 11;
+  let current = 0;
+  let animating = false;
+
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+
+  // Build dots
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  }
+
+  function goTo(n) {
+    if (animating || n === current || n < 0 || n >= TOTAL) return;
+    animating = true;
+
+    const from = slides[current];
+    const to = slides[n];
+
+    from.classList.add('exit');
+    to.classList.add('active');
+
+    // Update dots
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === n);
+    });
+    counter.textContent = `${n + 1} / ${TOTAL}`;
+    current = n;
+
+    setTimeout(() => {
+      from.classList.remove('active', 'exit');
+      animating = false;
+    }, 600);
+  }
+
+  document.getElementById('next-btn').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('prev-btn').addEventListener('click', () => goTo(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  // Touch swipe
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (dx < -50) goTo(current + 1);
+    if (dx > 50) goTo(current - 1);
+  });
+</script>
+</body>
+</html>
