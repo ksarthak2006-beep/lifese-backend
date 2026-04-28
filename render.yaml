@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: lifese-backend
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://lifese.vercel.app
+      - key: SMS_PROVIDER
+        value: fast2sms
+      - key: SMS_API_KEY
+        value: De3HVvSCjYnQdBP085iTqJzt6AbrkRLuWXFy4cOpg1xZfaUslo8cgJYTSGbZqdpkzjVXeKihv3oB4RLF
+      - key: SMS_SENDER_ID
+        value: LFHSID
+      - key: RESEND_API_KEY
+        value: re_BEuGxav2_KP7SgEHSoFtaCV6k62ZspTSL
+      - key: EMAIL_FROM
+        value: "LifeSe <noreply@lifese.health>"
