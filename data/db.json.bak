@@ -1,0 +1,123 @@
+{
+  "users": [],
+  "vault": [],
+  "consents": [],
+  "queue": [
+    {
+      "patientId": "demo-citizen-1",
+      "doctorId": "demo-doctor-1",
+      "addedAt": "2026-02-21T18:52:19.045Z",
+      "status": "waiting"
+    }
+  ],
+  "bookings": [],
+  "chronicleEvents": [],
+  "otps": [],
+  "doctorUnavailability": [],
+  "slotBidding": [],
+  "availabilitySnapshot": {},
+  "reminders": [],
+  "pillPhotos": [],
+  "clinicalNotes": [],
+  "healthPoints": [],
+  "guardians": [],
+  "multiSigRequests": [],
+  "guardianLinks": [],
+  "guardianAlerts": [],
+  "scribeDrafts": [],
+  "testCenters": [
+    {
+      "id": "tc-1",
+      "name": "City Diagnostic Lab",
+      "address": "Sector 5, Bhubaneswar, Odisha 751001",
+      "latitude": 20.297,
+      "longitude": 85.825,
+      "types": [
+        "blood_test",
+        "pathology"
+      ],
+      "charges": {
+        "CBC": 200,
+        "Lipid Profile": 450,
+        "Blood Sugar Fasting": 80,
+        "HbA1c": 350,
+        "Thyroid TSH": 400,
+        "Liver Function": 500,
+        "Kidney Function": 450,
+        "Complete Blood Panel": 800
+      }
+    },
+    {
+      "id": "tc-2",
+      "name": "Medanta Imaging Centre",
+      "address": "Jayadev Vihar, Bhubaneswar 751013",
+      "latitude": 20.305,
+      "longitude": 85.832,
+      "types": [
+        "xray",
+        "ct_scan",
+        "mri",
+        "ultrasound"
+      ],
+      "charges": {
+        "XRay_Chest": 250,
+        "XRay_Limb": 200,
+        "CT Head": 2500,
+        "CT Abdomen": 3500,
+        "MRI Brain": 4500,
+        "MRI Spine": 5500,
+        "Ultrasound_Abdomen": 600,
+        "ECG": 200
+      }
+    },
+    {
+      "id": "tc-3",
+      "name": "Apollo Diagnostics",
+      "address": "Saheed Nagar, Bhubaneswar 751007",
+      "latitude": 20.288,
+      "longitude": 85.818,
+      "types": [
+        "blood_test",
+        "pathology",
+        "xray"
+      ],
+      "charges": {
+        "CBC": 220,
+        "Lipid Profile": 480,
+        "Blood Sugar": 90,
+        "HbA1c": 380,
+        "XRay_Chest": 280,
+        "Dengue NS1": 450,
+        "COVID RTPCR": 500
+      }
+    },
+    {
+      "id": "tc-4",
+      "name": "Scan & Lab Hub",
+      "address": "Nayapalli, Bhubaneswar 751012",
+      "latitude": 20.292,
+      "longitude": 85.827,
+      "types": [
+        "blood_test",
+        "xray",
+        "ct_scan",
+        "ecg"
+      ],
+      "charges": {
+        "CBC": 180,
+        "Lipid Profile": 420,
+        "XRay_Chest": 220,
+        "CT Scan": 2800,
+        "ECG": 150,
+        "Serum Creatinine": 120,
+        "Urine Routine": 100
+      }
+    }
+  ],
+  "prescriptions": [],
+  "messages": [],
+  "auditLogs": [],
+  "carePathways": [],
+  "timelineEvents": [],
+  "masters": []
+}
