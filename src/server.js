@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import logger from './utils/logger.js';
 import { initSentry } from './utils/sentry.js';
@@ -59,6 +61,9 @@ import { securityHeaders, rateLimiter, globalErrorHandler } from './middleware/p
 dotenv.config();
 initSentry();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 const PORT = process.env.PORT || 5001;
@@ -69,7 +74,11 @@ app.use(rateLimiter);
 
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+  : [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'https://lifese-frontend.vercel.app',
+    ];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -136,6 +145,10 @@ app.use('/api/consult', consultRoutes);
 app.use('/api/audio-brief', audioBriefRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/community', communityRoutes);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', service: 'LifeSe Backend' }));
 app.get('/api/metrics', (req, res) => {
