@@ -19,12 +19,12 @@ export const securityHeaders = (req, res, next) => {
     const csp = [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' https://www.google-analytics.com",
-        "connect-src 'self' http://localhost:5001 https://api.lifese.health",
+        "connect-src 'self' http://localhost:5001 https://lifese-backend.onrender.com https://api.lifese.health",
         "img-src 'self' data: https:",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "object-src 'none'",
-        "frame-ancestors 'none'", // Block clickjacking
+        "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",
     ].join('; ');
