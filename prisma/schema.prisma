@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  healthId         String   @unique
+  name             String
+  phone            String   @unique
+  email            String?  @unique
+  role             String   @default("CITIZEN")
+  isBanned         Boolean  @default(false)
+  banReason        String?
+  bannedAt         DateTime?
+  createdAt        DateTime @default(now())
+
+  // Doctor-specific
+  qualification         String?
+  specialization        String?
+  registrationNumber    String?
+  isTelemedicineOriented Boolean @default(false)
+  verificationStatus    String @default("UNSUBMITTED")
+  verifiedAt            DateTime?
+
+  // Relations
+  prescriptions    Prescription[]
+  bookings         Booking[]
+
+  @@map("users")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}
+
+model Prescription {
+  id          String   @id @default(uuid())
+  patientId   String
+  doctorId    String
+  content     String
+  createdAt   DateTime @default(now())
+  patient     User @relation(fields: [patientId], references: [id])
+
+  @@map("prescriptions")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  patientId String
+  doctorId  String
+  slot      DateTime @default(now())
+  status    String   @default("PENDING_PAYMENT")
+  createdAt DateTime @default(now())
+  patient     User @relation(fields: [patientId], references: [id])
+
+  @@map("bookings")
+}
